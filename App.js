@@ -2,11 +2,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 
+const userRoutes = require('./routes/userRoutes');
+
 app.use(bodyParser.urlencoded({extended : false}));
 app.use(bodyParser.json());
 
-app.get('/test', (request, response) => {
-    return response.status(200).send("<h1>I'm the NodeJS Backend</h1>");
-});
+app.use('/api', userRoutes);
 
 module.exports = app;
