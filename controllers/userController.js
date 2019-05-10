@@ -11,8 +11,6 @@ const controller = {
         let params = request.body;
         let isValid = validate(params);
 
-        console.log('isValid = '+isValid);
-
         (isValid) ? response.status(200).send({ message : "Validation successfull"}) : response.status(200).send({ message : "Validation failed"}); 
     }
 }
@@ -22,8 +20,6 @@ function validate (params){
     let validateSurname = !validator.isEmpty(params.surname);
     let validateEmail = !validator.isEmpty(params.email) && validator.isEmail(params.email);
     let validatePassword = !validator.isEmpty(params.password);
-
-    console.log(validateName, validateSurname, validateEmail, validatePassword);
 
     if(validateName && validateSurname && validateEmail && validatePassword){return true;}
 
