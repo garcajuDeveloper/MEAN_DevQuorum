@@ -5,8 +5,8 @@ const PATH = require('path');
 const User = require('../models/user');
 const jwtUser = require('../services/jwt');
 
-const useController = {
-    
+const userController = {
+
     save: (request ,response) => {
         let params = request.body;
 
@@ -271,4 +271,4 @@ const useController = {
     }
 };
 
-module.exports = useController;
+module.exports = userController;
