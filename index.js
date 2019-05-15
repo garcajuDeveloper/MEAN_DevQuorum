@@ -3,6 +3,7 @@ const mongoConnectionURI = 'mongodb://localhost:27017/forumDB'
 const app = require('./App');
 const backendPort = process.env.PORT || 3999;
 
+mongoose.set('useFindAndModify', false);
 mongoose.Promise = global.Promise;
 mongoose.connect(mongoConnectionURI, { useNewUrlParser : true})
         .then(() => {
