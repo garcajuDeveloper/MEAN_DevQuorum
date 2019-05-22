@@ -215,6 +215,39 @@ const topicController = {
                 topicRemoved
             }); 
         })
+    },
+
+    searchTopic: (request, response) => {
+        //Conseguir string de busqueda de la url
+        let searchstring = request.params.search;
+        //find or
+        Topic.find({"$or" : [
+            {"title" : {"$regex" : searchstring, "$options" : "i"}},
+            {"content" : {"$regex" : searchstring, "$options" : "i"}},
+            {"lang" : {"$regex" : searchstring, "$options" : "i"}},
+            {"code" : {"$regex" : searchstring, "$options" : "i"}},
+        ]})
+        .sort([['date', 'descending']])
+        .exec((error, topics)=>{
+            if(error){
+                return response.status(500).send({
+                    status : 'error',
+                    message : 'error into request'
+                }); 
+            }
+
+            if(!topics){
+                return response.status(404).send({
+                    status : 'error',
+                    message : 'topics not avalaible'
+                }); 
+            }
+            //devolver repsuesta
+            return response.status(200).send({
+                status : 'success',
+                topics
+            }); 
+        })
     }
 }
 
