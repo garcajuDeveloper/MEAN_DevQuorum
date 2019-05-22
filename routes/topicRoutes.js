@@ -3,7 +3,7 @@ const topicController = require ('../controllers/topicController');
 const router = express.Router();
 const md_auth = require('../middlewares/authenticated');
 
-router.post('/save/', md_auth.authenticated, topicController.save);
+router.post('/topic/', md_auth.authenticated, topicController.save);
 router.get('/topics/:page?', topicController.getTopics );
 router.get('/topic-user/:user', topicController.getTopicsByUser);
 router.get('/topic/:topicId', topicController.getTopic);
