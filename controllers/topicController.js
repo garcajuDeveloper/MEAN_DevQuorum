@@ -2,12 +2,6 @@ const VALIDATOR = require('validator');
 const Topic = require('../models/topic');
 
 const topicController = {
-    test: (request, response) => {
-        return response.status(200).send({
-            message: 'Hola que tal desde el topicController'
-        }); 
-    },
-
     save: (request, response) => {
         let params = request.body;
     
@@ -50,7 +44,6 @@ const topicController = {
     },
 
     getTopics: (request, response) => {
-       //Cargar pagina actual
         if(!request.params.page || request.params.page == 0 || 
                 request.params.page == "0" || request.params.page == undefined)
         {
@@ -65,7 +58,7 @@ const topicController = {
             limit: 5,
             page: page
         }
-        //Find paginado
+
         Topic.paginate({}, paginationOptions, (error, topicList) =>{
             if(error){
                 return response.status(500).send({
@@ -88,8 +81,141 @@ const topicController = {
                 totalPages: topicList.totalPages
             });   
         })
+    },
+
+    getTopicsByUser: (request, response) => {
+        //Conseguir el id del user
+        let userID = request.params.user;
+
+        //find con condición del id del user
+        Topic.find({
+            user : userID
+        })
+        .sort([['date', 'descending']])
+        .exec((error, topics) => {
+            if(error){
+                return response.status(500).send({
+                    status: 'error',
+                    message: 'Error into request'
+                }); 
+            }
+            
+            if(!topics){
+                return response.status(404).send({
+                    status: 'error',
+                    message: 'No topics to show'
+                }); 
+            }else{
+                return response.status(200).send({
+                    status : 'success',
+                    topics
+                });  
+            }
+        });
+    },
+
+    getTopic : (request, response) =>{
+        let topicID = request.params.topicId;
+
+        Topic.findById(topicID)
+            .populate('user')
+            .exec((error, topic) => {
+            if(error){
+                return response.status(500).send({
+                    status: 'error',
+                    message: 'Error searching the topic'
+                }); 
+            }
+
+            if(!topic){
+                return response.status(404).send({
+                    status: 'error',
+                    message: 'Topic not found'
+                }); 
+            }else{
+                return response.status(200).send({
+                    status : 'success',
+                    topic
+                }); 
+            }
+        });
+    },
+
+    updateTopic: (request,response) => {
+        let topicID = request.params.id;
+        let params = request.body;
+
+        try{
+            var validateTitle = !VALIDATOR.isEmpty(params.title);
+            var validateContent = !VALIDATOR.isEmpty(params.content);
+            var validateLang = !VALIDATOR.isEmpty(params.lang);
+        }catch(error){
+            return response.status(200).send({
+                message: 'Missing data to send'
+            }); 
+        }
+
+        if(validateTitle && validateContent && validateLang){
+            let update = {
+                title : params.title,
+                content : params.content,
+                code : params.code,
+                lang : params.lang
+            };
+    
+            Topic.findOneAndUpdate({_id : topicID, user: request.user.sub}, update, {new : true},
+                 (error, topicUpdated) => {
+                    if(error){
+                        return response.status(500).send({
+                            status : 'error',
+                            message : 'error into request'
+                        });     
+                    }
+
+                    if(!topicUpdated){
+                        return response.status(404).send({
+                            status : 'error',
+                            message : 'topic not updated'
+                        }); 
+                    }
+
+                    return response.status(200).send({
+                        status : 'success',
+                        topicUpdated
+                    });      
+            });
+        }else{
+            return response.status(500).send({
+                status : 'error',
+                message : 'incorrect data validation'
+            }); 
+        }
+    },
+
+    deleteTopic : (request, response) => {
+        let topicID = request.params.id;
+
+        Topic.findOneAndDelete({_id : topicID, user: request.user.sub}, (error, topicRemoved) => {
+            if(error){
+                return response.status(500).send({
+                    status : 'error',
+                    message : 'error into request'
+                });     
+            }
+
+            if(!topicRemoved){
+                return response.status(404).send({
+                    status : 'error',
+                    message : 'topic not deleted or not exists'
+                }); 
+            }
+
+            return response.status(200).send({
+                status : 'success',
+                topicRemoved
+            }); 
+        })
     }
 }
 
 module.exports = topicController;
-//TODO 44. Devovler temas --> 1. Sacar temas de los usuarios
